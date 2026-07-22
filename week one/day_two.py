@@ -1,0 +1,119 @@
+jour2:dictionnaire:switch_cisco = {                                    #création d'un dictionnaire pour un switch cisco vide
+    "hostname": "",
+    "username": "",
+    "password": "",
+    "status": True,
+    "vlan_gestion": "",
+    "ip": "",
+    "interface": {
+        "GigabitEthernet0/0": {"status": "down", "vlan":1, "mode": "accesse"},
+        "GigabitEthernet0/1": {"status": "down", "vlan":1, "mode": "accesse"},
+        "GigabitEthernet0/2": {"status": "down", "vlan":1, "mode": "accesse"},
+        }
+}
+
+
+host = input("Enter host name")					#demande a l'utilisateur de rentrer toute les information qui vont ensuite aller remplacer les "" dans le dictionnaire
+switch_cisco["hostname"] = host
+username = input("Enter username")
+switch_cisco["username"] = username
+password = input("Enter password")
+switch_cisco["password"] = password
+while True:                                                     #création d'une boucle pour gérer les contrainte de l'ip
+    ip = input("ip de l'appareille")
+    count = ip.count(".")                                       #compte le nombre de point et si c'est different de 3 fait un code d'erreur et retourne en haut
+    if count != 3:
+        print("veuiller entrer une ip valide")
+        continue
+    octets = ip.split(".")                                      # création de la variable octet qui est chaque section de l'ip diviser au point
+    ip_valide = True						#création d'une variable = True pour pouvoir briser la boucle while si c'est faut
+    for octet in octets:
+        if not octet.isdigit():
+            print("veuiller entrez une addresse valide")
+           ip_valide = False
+           break
+        valeur =int(octet)
+        if int(octet)>255 or int(octet)<0:
+           print("veuiller entrez une addresse valide")
+           ip_valide = False
+           break
+    if ip_valide:
+        switch_cisco["ip"] = ip
+        break
+    else:
+        print("veuiller entrez une ip svalide")
+while True:
+    status = input("is the host shut?")
+    if status == "yes":
+        switch_cisco["status"] = True
+        break
+    elif status == "no":
+        switch_cisco["status"] = False
+        break
+    else:
+        print("Please enter yes or no")
+
+while True:
+    vlan= input("quelle est le vlan de gestion du host")
+    if not vlan.isdigit():
+        print("veuiller entrez un nombre")
+        continue
+    if  int(vlan)>4094 or int(vlan)<0:
+        print("veuiller entrez un nombre entre 0 et 4094")
+        continue
+    if vlan:
+        switch_cisco["vlan_gestion"] = vlan
+        break
+
+while True:
+    interface_in = input("voulez vous modifier un interface ?")
+    if  interface_in == "no":
+        break
+    elif interface_in == "yes":
+        interface_choice = input("quelles interface voulez vous modifier ?")
+        if interface_choice in switch_cisco["interface"]:
+            print("vous êtes bien dans l'interface" + interface_choice)
+            choice = input("que voulez vous modifier ? (status/vlan/mode)")
+            if choice == "status":
+                while True:
+                    choice_etat = input("éteindre l'appareil? (down/up)")
+                    if choice_etat == "down" or choice_etat == "up":
+                        switch_cisco["interface"][interface_choice]["status"] = choice_etat
+                        print("l'état a bien été changer pour " + choice_etat)
+                        break
+                    else:
+                        print("veuiller choisir entre down/up")
+            elif choice == "vlan":
+                while True:
+                    choice_vlan = input("quelle va etre le vlan de l'interface ?")
+                    if not choice_vlan.isdigit():
+                        print("veuillez choisir un nombre")
+                        continue
+                    elif int(choice_vlan)>4094 or (int(choice_vlan)<0):
+                        print("veuillez choisir un nombre entre 0 et 4094")
+                        continue
+                    else:
+                        switch_cisco["interface"][interface_choice]["vlan"] = int(choice_vlan)
+                        print("le vlan de l'interface " + interface_choice + " a bien été changer pour " + choice_vlan)
+                        break
+            elif choice == "mode":
+                while True:
+                    choice_mode = input("quelle mode de l'interface ? access/trunk")
+                    if choice_mode == "access" or choice_mode == "trunk":
+                        switch_cisco["interface"][interface_choice]["mode"] = choice_mode
+                        print("l'interface " + interface_choice + " est passer en mode " + choice_mode)
+                        break
+                    else:
+                        print("veuiller choisir entre trunk/access")
+
+        else:
+            print("l'interface n'existe pas")
+            continue
+    else:
+        print("veuillez choisir yes/no ?")
+        continue
+for key, value in switch_cisco.items():
+    if key == "password":
+        print(f"{key}:*******")
+    else:
+        print(f"{key}: {value}")
